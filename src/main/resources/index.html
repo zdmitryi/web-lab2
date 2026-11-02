@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Lab 2</title>
+</head>
+<body>
+<div class="main-container">
+    <header class="main-header">
+        <p>ФИО: Звонков Дмитрий</p>
+        <p>Группа: P3212</p>
+        <p>Вариант: 69431</p>
+    </header>
+    <main class="grid">
+        <section class="form-section">
+            <form id="coordinate-form">
+                <div class="form-group">
+                    <label for="x-select">Изменение X:</label>
+                    <select id="x-select" name="x" required>
+                        <option value="" disabled selected>Выберите X</option>
+                        <option value="-5">-5</option>
+                        <option value="-4">-4</option>
+                        <option value="-3">-3</option>
+                        <option value="-2">-2</option>
+                        <option value="-1">-1</option>
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="y-input">Изменение Y:</label>
+                    <input type="text" id="y-input" name="y" placeholder="Введите Y (от -3 до 3)"
+                           required pattern="-?\d+([.,]\d{1,15})?">
+                    <div class="error-message" id="y-error">Введите число от -3 до 3</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Изменение R:</label>
+                    <div class = "r-checkboxes">
+                        <label><input type="checkbox" name="r" value="1"> 1</label>
+                        <label><input type="checkbox" name="r" value="1.5"> 1.5</label>
+                        <label><input type="checkbox" name="r" value="2"> 2</label>
+                        <label><input type="checkbox" name="r" value="2.5"> 2.5</label>
+                        <label><input type="checkbox" name="r" value="3"> 3</label>
+                    </div>
+                    <div class="error-message" id="r-error">Выберите один радиус</div>
+                </div>
+                <button type="submit">Проверить</button>
+            </form>
+        </section>
+        <section class="canvas-section">
+            <div id="canvas-container">
+                <canvas id="graph-canvas" width="500" height="500"></canvas>
+            </div>
+        </section>
+    </main>
+    <section class="result-section">
+        <div class="result-table-container">
+            <table class="result-table">
+                <thead>
+                <tr>
+                    <th scope="col">X</th>
+                    <th scope="col">Y</th>
+                    <th scope="col">R</th>
+                    <th scope="col">Попадание</th>
+                    <th scope="col">Время</th>
+                </tr>
+                </thead>
+                <tbody id="result-body">
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
