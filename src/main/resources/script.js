@@ -19,25 +19,24 @@ const R_COLORS = {
     3:   'rgba(255, 208, 0, 0.61)'     
 };
 
+drawAxes();
+
 form.addEventListener('submit', function(event) {
     event.preventDefault();
 
-    const x = parseFloat(document.getElementById('x-select').value);
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
 
     const yStr = yInput.value.replace(',', '.');
     const y = parseFloat(yStr);
-
     const rCheckboxes = document.querySelectorAll('input[name="r"]:checked');
-
     const rValues = Array.from(rCheckboxes).map((checkbox) => parseFloat(checkbox.value));
-
-    rValues.sort((a, b) => b - a);
-
-    const time = Date.now();
 
     let isValid = true;
 
-    if (Number.isNaN(y) || y < -3 || y > 3){
+    if (Number.isNaN(y) || y < -3 || y > 3) {
         yError.style.display = 'block';
         isValid = false;
     } else {
@@ -51,25 +50,54 @@ form.addEventListener('submit', function(event) {
         rError.style.display = 'none';
     }
 
-    if (!isValid){
+    if (!isValid) {
         return;
     }
 
-    drawGraph(x, y, rValues);
+    const x = parseFloat(document.getElementById('x-select').value);
 
-    rValues.forEach((r) => {
-        const isHit = checkHit(x, y, r);
-        addResultToTable(x, y, r, isHit, time);
-        saveResult(x, y, r, isHit, time);
+    const requests = rValues.map(r => {
+        const url = `check?x=${x}&y=${y}&r=${r}`;
+        return fetch(url).then(response => response.json());
     });
 
+    Promise.all(requests)
+        .then(results => {
+            let lastValidData = null;
+            for (let i = results.length - 1; i >= 0; i--) {
+                if (!results[i].error) {
+                    lastValidData = results[i];
+                    break;
+                }
+            }
+
+            if (lastValidData) {
+                updateTable(lastValidData.history);
+                const isHit = lastValidData.history[0].isHit;
+                drawGraph(x, y, rValues, isHit);
+            } else {
+                alert("Ошибка при обработке запросов");
+            }
+        })
+        .catch(error => {
+            console.error('AJAX Error:', error);
+        });
 });
 
-function loadResultsFromStorage() {
-    const results = JSON.parse(localStorage.getItem('labResults') || '[]');
-
-    results.forEach(function(result) {
-        addResultToTable(result.x, result.y, result.r, result.hit, result.time);
+function updateTable(history) {
+    resultsBody.innerHTML = '';
+    history.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.x}</td>
+            <td>${item.y}</td>
+            <td>${item.r}</td>
+            <td style="color: ${item.isHit ? 'green' : 'red'}; font-weight: bold;">
+                ${item.isHit ? 'Попадание' : 'Промах'}
+            </td>
+            <td>${item.time}</td>
+        `;
+        resultsBody.appendChild(row);
     });
 }
 
@@ -87,42 +115,18 @@ function drawPoint(x, y, isHit){
     ctx.fillStyle = '#000000';
 }
 
-function drawGraph(x, y, rValues){
+function drawGraph(x, y, rValues, isHit){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawAxes();
 
-    rValues.forEach(function(r) {
-        const color = R_COLORS[r];
+    const sortedR = [...rValues].sort((a, b) => b - a);
+
+    sortedR.forEach(r => {
+        const color = R_COLORS[r] || R_COLORS[1];
         drawArea(r, color);
     });
 
-    let anyHit = false;
-    rValues.forEach(function(r) {
-        if (checkHit(x, y, r)) {
-            anyHit = true;
-        }
-    });
-
-    drawPoint(x, y, anyHit);
-}
-
-function addResultToTable(x, y, r, isHit, time){
-    const row = document.createElement('tr');
-
-    const hitText = isHit ? 'Попадание' : 'Промах';
-    const hitColor = isHit ? 'green' : 'red';
-
-    const dateStr = new Date(time).toLocaleString('ru-RU');
-
-    row.innerHTML = `
-        <td>${x}</td>
-        <td>${y}</td>
-        <td>${r}</td>
-        <td style="color: ${hitColor}; font-weight: bold;">${hitText}</td>
-        <td>${dateStr}</td>
-    `;
-
-    resultsBody.prepend(row);
+    drawPoint(x, y, isHit);
 }
 
 function drawAxes(){
@@ -192,31 +196,3 @@ function drawArea(r, color){
     ctx.fill();
     ctx.stroke();
 }
-
-function checkHit(x, y, r){
-
-    const isInSquare = (x >= -r && x <= 0 && y >= 0 && y <= r);
-
-    const isInTriangle = (x >= 0 && x <= r && y <= 0 && y >= -r/2 && (x - 2*y) <= r);
-
-    const isInCircle = (x >= -r/2 && x <= 0 && y >= -r/2 && y <= 0 && (x*x + y*y) <= (r/2)*(r/2));
-
-    return isInSquare || isInTriangle || isInCircle;
-}
-
-function saveResult(x, y, r, isHit, time){
-    const results = JSON.parse(localStorage.getItem('labResults') || '[]');
-
-    results.push({
-        x: x,
-        y: y,
-        r: r,
-        hit: isHit,
-        time: time
-    });
-
-    localStorage.setItem('labResults', JSON.stringify(results));
-}
-
-loadResultsFromStorage();
-drawAxes();
