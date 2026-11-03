@@ -46,10 +46,10 @@ public class FastCGIServer {
             boolean isHit = checkHit(x, y, r);
             String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
 
-            long duration = (System.nanoTime() - startTime) / 1_000_000;
+            long duration = (System.nanoTime() - startTime) / 1000;
 
             String currentResult = String.format(
-                    "{\"x\": %s, \"y\": %s, \"r\": %s, \"isHit\": %b, \"time\": \"%s\", \"executionTime\": \"%d ms\"}",
+                    "{\"x\": %s, \"y\": %s, \"r\": %s, \"isHit\": %b, \"time\": \"%s\", \"executionTime\": \"%d μs\"}",
                     params.get("x"), params.get("y"), params.get("r"), isHit, time, duration
             );
 

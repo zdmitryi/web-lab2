@@ -96,6 +96,7 @@ function updateTable(history) {
                 ${item.isHit ? 'Попадание' : 'Промах'}
             </td>
             <td>${item.time}</td>
+            <td>${item.executionTime || '-'}</td>
         `;
         resultsBody.appendChild(row);
     });
