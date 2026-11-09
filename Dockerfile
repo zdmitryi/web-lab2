@@ -11,8 +11,6 @@ RUN sed -i \
 
 COPY target/classes /app/classes
 COPY fastcgi-lib.jar /app/fastcgi-lib.jar
-COPY run.sh /app/run.sh
-RUN chmod +x /app/run.sh
 
 COPY src/main/resources/index.html /usr/local/apache2/htdocs/
 COPY src/main/resources/styles.css /usr/local/apache2/htdocs/

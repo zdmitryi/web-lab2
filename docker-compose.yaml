@@ -4,4 +4,3 @@ services:
     container_name: web-lab2
     ports:
       - "8080:80"
-    restart: unless-stopped
